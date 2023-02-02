@@ -17,6 +17,9 @@ namespace TestClient
 
         protected OBSWebsocket obs;
 
+        private int keepSoundEntries = 50;
+        private List<float> activeSound = new List<float>();
+
         public void SetOBS(OBSWebsocket obs)
         {
             this.obs = obs;
@@ -84,6 +87,21 @@ namespace TestClient
             obs.StudioModeStateChanged += Obs_StudioModeStateChanged;
 
             obs.VirtualcamStateChanged += Obs_VirtualcamStateChanged;
+        }
+
+        private void Obs_InputVolumeMeters(object sender, InputVolumeMetersEventArgs args)
+        {
+            var firstInput = args.inputs.FirstOrDefault();
+            var channelLevel = firstInput.InputLevels.FirstOrDefault();
+
+            if (activeSound.Count > keepSoundEntries)
+            {
+                activeSound.RemoveAt(0);
+            }
+            activeSound.Add(channelLevel.PeakRaw);
+            var totalSound = activeSound.Sum() / keepSoundEntries;
+            bool hasSound = (totalSound > 0.01) ? true : false;
+            LogMessage($"[InputVolumeMeters] Number Of Inputs: {args.inputs.Count} - HAZ SOUND? == {hasSound} ({totalSound}) - MUL: {firstInput.InputName} ({channelLevel.PeakRaw}/{channelLevel.PeakWithVolume}/{channelLevel.magnitudeWithVolume})");
         }
 
         private void Obs_InputActiveStateChanged(object sender, InputActiveStateChangedEventArgs args)
@@ -269,16 +287,24 @@ namespace TestClient
 
         private void LogMessage(string message)
         {
-            if (InvokeRequired)
+            try
             {
-                this.Invoke(new MethodInvoker(() =>
+                if (InvokeRequired)
+                {
+                    this.Invoke(new MethodInvoker(() =>
+                    {
+                        tbLog.AppendText($"{Environment.NewLine}[{DateTime.Now:HH:mm:ss}]{message}");
+                    }));
+                }
+                else
                 {
                     tbLog.AppendText($"{Environment.NewLine}[{DateTime.Now:HH:mm:ss}]{message}");
-                }));
-            }
-            else
+                }
+            } 
+            // Happens when window is closing during High Volume Events being logged.
+            catch(Exception)
             {
-                tbLog.AppendText($"{Environment.NewLine}[{DateTime.Now:HH:mm:ss}]{message}");
+
             }
         }
 
@@ -590,6 +616,28 @@ namespace TestClient
         private void btnDoNothing_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnHVEvents_Click(object sender, EventArgs e)
+        {
+            if (obs == null)
+            {
+                LogMessage("Error: OBS is null!");
+                return;
+            }
+
+            obs.InputVolumeMeters += Obs_InputVolumeMeters;
+        }
+
+        private void btnHVEventsUnSubscribe_Click(object sender, EventArgs e)
+        {
+            if (obs == null)
+            {
+                LogMessage("Error: OBS is null!");
+                return;
+            }
+
+            obs.InputVolumeMeters -= Obs_InputVolumeMeters;
         }
 #pragma warning restore IDE1006 // Naming Styles
     }
