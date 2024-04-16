@@ -1,30 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<AssemblyName>obs-websocket-dotnet</AssemblyName>
+		<TargetFramework>net7.0</TargetFramework>
+		<AssemblyName>obs-websocket-dotnet-glax</AssemblyName>
 		<RootNamespace>OBSWebsocketDotNet</RootNamespace>
-		<Copyright>Copyright © BarRaider 2022</Copyright>
+		<Copyright>Glax 2024</Copyright>
 		<LangVersion>8</LangVersion>
-		<Version>5.0.0.3</Version>
+		<Version>5.1.0.3</Version>
 		<Authors>BarRaider</Authors>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<PackageProjectUrl>https://github.com/BarRaider/obs-websocket-dotnet</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/BarRaider/obs-websocket-dotnet</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageProjectUrl>https://github.com/C9Glax/obs-websocket-dotnet</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/C9Glax/obs-websocket-dotnet</RepositoryUrl>
 		<Description>Official obs-websocket .NET library. Written in C#. Supports .NET Standard</Description>
 		<PackageTags>OBS obs-websocket websocket official obs-websocket-dotnet obs.websocket.net obs-websocket-net</PackageTags>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<PackageReleaseNotes>Ported to use new OBS Websocket v5.0
-NOTE: As OBS Websocket v5.0 is not backward compatible with 4.9.x, neither is the .Net version.
-
-What's new in v5.0.0.3
-* Fixed issue with integer overflow for OutputStatus objects
-(Previous updates):
-* Each event now has a dedicated EventArgs class. This will break the previous event signature
-* Finished adding all v5 methods
-* Connect() function is now obsolete, use ConnectAsync() instead.
-* Additional bugfixes and stability fixes
-</PackageReleaseNotes>
+		<PackageId>obs-websocket-dotnet-glax</PackageId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -32,8 +23,8 @@ What's new in v5.0.0.3
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-	  <PackageReference Include="Websocket.Client" Version="4.4.43" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	  <PackageReference Include="Websocket.Client" Version="5.1.1" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -41,6 +32,13 @@ What's new in v5.0.0.3
 	    <Pack>True</Pack>
 	    <PackagePath></PackagePath>
 	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
 	</ItemGroup>
 
 </Project>

@@ -140,11 +140,32 @@ namespace OBSWebsocketDotNet
         /// A scene item is selected in the UI
         /// </summary>
         public event EventHandler<SceneItemSelectedEventArgs> SceneItemSelected;
+        
+        private event EventHandler<SceneItemTransformEventArgs> sceneItemTransformChanged;
 
         /// <summary>
-        /// A scene item transform has changed
+        /// A high-volume event providing volume levels of all active inputs every 50 milliseconds.
         /// </summary>
-        public event EventHandler<SceneItemTransformEventArgs> SceneItemTransformChanged;
+        public event EventHandler<SceneItemTransformEventArgs> SceneItemTransformChanged
+        {
+            // This event needs special subscription, handle that here
+            add
+            {
+                if (sceneItemTransformChanged == null || sceneItemTransformChanged.GetInvocationList().Length == 0)
+                {
+                    RegisterEvent(EventSubscription.SceneItemTransformChanged);
+                }
+                sceneItemTransformChanged += value;
+            }
+            remove
+            {
+                sceneItemTransformChanged -= value;
+                if (sceneItemTransformChanged == null || sceneItemTransformChanged.GetInvocationList().Length == 0)
+                {
+                    UnRegisterEvent(EventSubscription.SceneItemTransformChanged);
+                }
+            }
+        }
 
         /// <summary>
         /// The audio sync offset of an input has changed
@@ -236,17 +257,62 @@ namespace OBSWebsocketDotNet
         /// </summary>
         public event EventHandler<InputNameChangedEventArgs> InputNameChanged;
 
+        
+        private event EventHandler<InputActiveStateChangedEventArgs> inputActiveStateChanged;
+        
         /// <summary>
         /// An input's active state has changed.
         /// When an input is active, it means it's being shown by the program feed.
         /// </summary>
-        public event EventHandler<InputActiveStateChangedEventArgs> InputActiveStateChanged;
+        public event EventHandler<InputActiveStateChangedEventArgs> InputActiveStateChanged
+        {
+            // This event needs special subscription, handle that here
+            add
+            {
+                if (inputActiveStateChanged == null || inputActiveStateChanged.GetInvocationList().Length == 0)
+                {
+                    RegisterEvent(EventSubscription.InputActiveStateChanged);
+                }
+
+                inputActiveStateChanged += value;
+            }
+            remove
+            {
+                inputActiveStateChanged -= value;
+                if (inputActiveStateChanged == null || inputActiveStateChanged.GetInvocationList().Length == 0)
+                {
+                    UnRegisterEvent(EventSubscription.InputActiveStateChanged);
+                }
+            }
+        }
+
+        private event EventHandler<InputShowStateChangedEventArgs> inputShowStateChanged;
 
         /// <summary>
         /// An input's show state has changed.
         /// When an input is showing, it means it's being shown by the preview or a dialog.
         /// </summary>
-        public event EventHandler<InputShowStateChangedEventArgs> InputShowStateChanged;
+        public event EventHandler<InputShowStateChangedEventArgs> InputShowStateChanged
+        {
+            // This event needs special subscription, handle that here
+            add
+            {
+                if (inputShowStateChanged == null || inputShowStateChanged.GetInvocationList().Length == 0)
+                {
+                    RegisterEvent(EventSubscription.InputShowStateChanged);
+                }
+
+                inputShowStateChanged += value;
+            }
+            remove
+            {
+                inputShowStateChanged -= value;
+                if (inputShowStateChanged == null || inputShowStateChanged.GetInvocationList().Length == 0)
+                {
+                    UnRegisterEvent(EventSubscription.InputShowStateChanged);
+                }
+            }
+        }
 
         /// <summary>
         /// The audio balance value of an input has changed.
@@ -349,7 +415,7 @@ namespace OBSWebsocketDotNet
                 // Throws ErrorResponseException if auth fails
                 SendRequest(MessageTypes.ReIdentify, null, requestFields, false);
             }
-            catch (ErrorResponseException ex)
+            catch (ErrorResponseException)
             {
                 Disconnected?.Invoke(this, new ObsDisconnectionInfo(
                     ObsCloseCodes.UnknownReason,
@@ -471,7 +537,7 @@ namespace OBSWebsocketDotNet
                     break;
 
                 case nameof(SceneItemTransformChanged):
-                    SceneItemTransformChanged?.Invoke(this, new SceneItemTransformEventArgs((string)body["sceneName"], (string)body["sceneItemId"], new SceneItemTransformInfo((JObject)body["sceneItemTransform"])));
+                    sceneItemTransformChanged?.Invoke(this, new SceneItemTransformEventArgs((string)body["sceneName"], (string)body["sceneItemId"], new SceneItemTransformInfo((JObject)body["sceneItemTransform"])));
                     break;
 
                 case nameof(InputAudioSyncOffsetChanged):
@@ -553,11 +619,11 @@ namespace OBSWebsocketDotNet
                     break;
 
                 case nameof(InputActiveStateChanged):
-                    InputActiveStateChanged?.Invoke(this, new InputActiveStateChangedEventArgs((string)body["inputName"], (bool)body["videoActive"]));
+                    inputActiveStateChanged?.Invoke(this, new InputActiveStateChangedEventArgs((string)body["inputName"], (bool)body["videoActive"]));
                     break;
 
                 case nameof(InputShowStateChanged):
-                    InputShowStateChanged?.Invoke(this, new InputShowStateChangedEventArgs((string)body["inputName"], (bool)body["videoShowing"]));
+                    inputShowStateChanged?.Invoke(this, new InputShowStateChangedEventArgs((string)body["inputName"], (bool)body["videoShowing"]));
                     break;
 
                 case nameof(InputAudioBalanceChanged):
